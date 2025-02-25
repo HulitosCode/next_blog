@@ -13,7 +13,7 @@ const NavBar = () => {
   return (
     <div className="flex items-center justify-around gap-10 pt-6">
       <h1 className="font-bold">
-        <Link href='/'>
+        <Link href="/">
           <BookOpenCheck color="blue" />
         </Link>
       </h1>

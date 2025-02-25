@@ -1,6 +1,6 @@
 export type FormInputPost = {
   title: string;
-  file: string;
+  file?: string;
   content: string;
-  tag: string;
+  tagId: string;
 };
