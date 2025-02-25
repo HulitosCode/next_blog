@@ -1,18 +1,11 @@
 import { db } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-interface ContextProps {
-  params: { postId: string };
-}
-
 // Função DELETE para remover o post
-export async function DELETE(req: Request, context: ContextProps) {
+export async function DELETE(req: Request, { params }: { params: { postId: string } }) {
   try {
-    const { params } = context;
     await db.post.delete({
-      where: {
-        id: params.postId,
-      },
+      where: { id: params.postId },
     });
     return new Response(null, { status: 204 });
   } catch {
@@ -24,7 +17,7 @@ export async function DELETE(req: Request, context: ContextProps) {
 }
 
 // Função PATCH para atualizar o post
-export async function PATCH(req: Request, context: ContextProps) {
+export async function PATCH(req: Request, { params }: { params: { postId: string } }) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
@@ -32,7 +25,6 @@ export async function PATCH(req: Request, context: ContextProps) {
     const content = formData.get("content") as string;
     const tagId = formData.get("tagId") as string;
 
-    // Validação de campos obrigatórios
     if (!file || !title || !content || !tagId) {
       return NextResponse.json(
         { message: "Todos os campos são obrigatórios" },
@@ -40,19 +32,14 @@ export async function PATCH(req: Request, context: ContextProps) {
       );
     }
 
-    // Gerar nome de arquivo único para a imagem
     const fileName = `${Date.now()}-${file.name}`;
-    const { params } = context;
 
-    // Atualizar o post no banco
     await db.post.update({
-      where: {
-        id: params.postId,
-      },
+      where: { id: params.postId },
       data: {
         title,
         content,
-        file: `/uploads/${fileName}`, // Caminho da imagem
+        file: `/uploads/${fileName}`,
         tagId,
       },
     });
@@ -66,21 +53,17 @@ export async function PATCH(req: Request, context: ContextProps) {
   }
 }
 
-export async function GET(req: Request, context: ContextProps) {
+// Função GET para obter um post específico
+export async function GET(req: Request, { params }: { params: { postId: string } }) {
   try {
-    const { params } = context;
     const post = await db.post.findFirst({
-      where: {
-        id: params.postId,
-      },
-      include: {
-        tag: true,
-      },
+      where: { id: params.postId },
+      include: { tag: true },
     });
     return NextResponse.json(post, { status: 200 });
   } catch {
     return NextResponse.json(
-      { message: "Could not fetch tags" },
+      { message: "Could not fetch post" },
       { status: 500 },
     );
   }
